@@ -1,13 +1,16 @@
 # 안드로이드 로깅 전략
 
-안드로이드 개발을 하다 보면 “어디서, 왜 에러가 났는지”를 빠르게 파악하는 것이 중요하다.  
+안드로이드 개발을 하다 보면 “어디서, 왜 에러가 났는지” "어떤 에러가 많이 발생하였는지"를 빠르게 파악하는 것이 중요하다.  
 이를 돕는 도구가 바로 **로깅(logging)**이다.  
 로깅은 단순히 콘솔에 출력하는 수준을 넘어, 실제 운영 단계에서 앱 품질을 유지하는 핵심 도구다.  
 
 이번 글에서는 안드로이드에서 사용할 수 있는 다양한 로깅 전략을 살펴본다.  
 기본 Log 클래스부터 Timber, Crashlytics, 그리고 Webhook을 통한 실시간 알림까지 단계별로 정리해보자.  
   
-## 1️⃣ 기본 Log 클래스
+  
+## 안드로이드 여러 로깅 전략
+
+### 기본 Log 클래스
 
 안드로이드 SDK가 제공하는 가장 기본적인 로깅 도구는 android.util.Log다.
 ```kotlin
@@ -22,9 +25,9 @@ Log.e("MainActivity", "Network error", exception)
 따라서 프로젝트가 커질수록 유지보수가 어렵다.
 그럴 때 등장하는 게 바로 Logger나 Timber 같은 고수준 로깅 라이브러리다.
 
-## 2️⃣ Logger
+### Logger
 
-<img width="467" height="30" alt="스크린샷 2025-10-14 오후 4 15 39" src="https://github.com/user-attachments/assets/f814f235-2ede-46ab-98a6-510703796a44" />
+<img width="467" height="30" alt="스크린샷 2025-10-14 오후 4 15 39" src="https://github.com/user-attachments/assets/f814f235-2ede-46ab-98a6-510703796a44" />
 
 Logger는 Log를 개선한 라이브러리로,
 다양한 포맷과 JSON, XML 포매팅을 지원한다.
@@ -40,7 +43,7 @@ Logger.json("{\"user\":\"hyunseok\", \"age\":26}")
   
 개발 중에는 보기 좋고, 가독성이 좋아 디버깅 효율을 높인다.
 
-## 3️⃣ Timber 
+### Timber 
 
 <img width="466" height="30" alt="스크린샷 2025-10-14 오후 4 12 30" src="https://github.com/user-attachments/assets/b212e08d-9ec5-4480-b6eb-490ebcbd8456" />
 
@@ -69,8 +72,8 @@ Timber는 Application 단에서 위와 같은 간단한 코드로 빌드를 구�
   
 즉, 개발 단계에서는 Timber 하나로 대부분의 로깅 니즈를 해결할 수 있다.
 
-## 4️⃣ 로깅 레벨
-로깅에는 여러 “심각도(Level)”가 있다.
+### 로깅 레벨
+로깅에는 여러 로깅레벨이 있다.
 보통 다음과 같이 구분한다.
 
 | **레벨(Level)** | **설명(Description)** | **예시(Example)** |
@@ -85,7 +88,10 @@ Timber는 Application 단에서 위와 같은 간단한 코드로 빌드를 구�
 Timber나 Logger는 이 레벨들을 자동 지원하며,  
 Firebase나 Webhook 연동 시에도 이 레벨을 활용해 필터링할 수 있다.
 
-## 5️⃣ Firebase Analytics — 사용자 행동 기반 로깅
+## Firebase를 통한 로깅 방법
+
+
+### Firebase Analytics — 사용자 행동 기반 로깅
 
 Firebase Analytics는 사용자의 행동을 중심으로 로그를 수집한다.
 예를 들어, 어떤 버튼을 눌렀는지, 어떤 화면을 자주 방문하는지 등을 분석할 수 있다.
@@ -102,7 +108,7 @@ Firebase.analytics.logEvent("button_click", bundle)
   
 즉, Analytics는 “앱이 어떻게 사용되는가”를 로깅하는 데 초점을 둔다.
 
-## 6️⃣ Firebase Crashlytics — 크래시 및 ANR 추적
+### Firebase Crashlytics — 크래시 및 ANR 추적
 
 Crashlytics는 앱에서 발생한 **크래시, 비정상 종료(ANR)**를 자동으로 수집한다.
 - 스택 트레이스와 기기 정보 자동 수집
@@ -144,12 +150,12 @@ class TuripReleaseTree : Timber.Tree() {
 |  **Crash 로그 상세 화면** |  **로그 필터링 및 통계 화면** |
 
 ---
-## 7️⃣ Webhook을 통한 실시간 로깅 알림
+## Webhook을 통한 실시간 로깅 알림
 
 Firebase가 수집한 로그는 대시보드에서만 확인할 수 있다.  
 하지만 팀이 빠르게 대응하려면, Slack이나 Discord로 바로 알림을 보내는 Webhook을 활용하는 것이 좋다.
 
-### ✅ Retrofit을 통한 Webhook 연동
+### Retrofit을 통한 Webhook 연동
 ```kotlin
 interface WebhookService {
     @POST("") // 사용할 웹훅 주소
@@ -158,10 +164,14 @@ interface WebhookService {
 ```
 에러 발생 시 JSON 형태로 로그를 전송하여 팀 채널에 즉시 표시할 수 있다.
 
-> 단, 사용자 수가 많을 경우 로그 폭주로 인해 알림이 과도하게 전송될 수 있으므로,
-Google Apps Script 기반의 중간 처리 방식을 권장한다.
+<div style="border-left: 4px solid #facc15; padding: 12px; background: #fffbe6;">
+  ⚠️ <strong>주의</strong><br>
+  사용자 수가 많을 경우 로그 폭주로 인해 알림이 과도하게 전송될 수 있으므로,<br>
+  Google Apps Script 기반의 중간 처리 방식을 권장한다.
+</div>
 
-### ✅ Google Apps Script를 통한 Webhook 연동
+
+### Google Apps Script를 통한 Webhook 연동
 ```kotlin
 var webhookUrl = "" // 사용할 웹훅 주소
   var params = {
@@ -176,7 +186,7 @@ var webhookUrl = "" // 사용할 웹훅 주소
 > 2. Slack/Discord Webhook으로 전송
 > 3. 팀은 별도 앱 실행 없이 실시간 에러 확인 가능
 
-<img width="400" height="400" alt="스크린샷 2025-10-14 오후 4 31 05" src="https://github.com/user-attachments/assets/11819e2b-9c58-49c7-9d6d-8e078d427a72" />
+<img width="400" height="400" alt="스크린샷 2025-10-14 오후 4 31 05" src="https://github.com/user-attachments/assets/11819e2b-9c58-49c7-9d6d-8e078d427a72" />
 
 또한, Apps Script는 위와 같은 트리거를 설정하여 일정 시간동안 받은 데이터를 한꺼번에 취합해서 메시지를 전송받도록 할 수 있다.
 

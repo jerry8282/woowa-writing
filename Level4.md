@@ -1,5 +1,4 @@
-# 안드로이드 로깅 전략
-
+![](https://velog.velcdn.com/images/ka06196/post/731103d3-aaec-45b8-92e9-a497f8155bef/image.png)
 안드로이드 개발을 하다 보면 “어디서, 왜 에러가 났는지” "어떤 에러가 많이 발생하였는지"를 빠르게 파악하는 것이 중요하다.  
 이를 돕는 도구가 바로 **로깅(logging)**이다.  
 로깅은 단순히 콘솔에 출력하는 수준을 넘어, 실제 운영 단계에서 앱 품질을 유지하는 핵심 도구다.  
@@ -10,7 +9,7 @@
   
 ## 안드로이드 여러 로깅 전략
 
-### 기본 Log 클래스
+### [기본 Log 클래스](https://developer.android.com/reference/kotlin/android/util/Log)
 
 안드로이드 SDK가 제공하는 가장 기본적인 로깅 도구는 android.util.Log다.
 ```kotlin
@@ -25,29 +24,28 @@ Log.e("MainActivity", "Network error", exception)
 따라서 프로젝트가 커질수록 유지보수가 어렵다.
 그럴 때 등장하는 게 바로 Logger나 Timber 같은 고수준 로깅 라이브러리다.
 
-### Logger
+### [Logger](https://github.com/orhanobut/logger?tab=readme-ov-file)
 
 <img width="467" height="30" alt="스크린샷 2025-10-14 오후 4 15 39" src="https://github.com/user-attachments/assets/f814f235-2ede-46ab-98a6-510703796a44" />
 
 Logger는 Log를 개선한 라이브러리로,
-다양한 포맷과 JSON, XML 포매팅을 지원한다.
+다양한 포맷과 JSON 포매팅을 지원한다.
 
 ```kotlin
 Logger.d("This is a debug log")
 Logger.json("{\"user\":\"hyunseok\", \"age\":26}")
 ```
 특징
-- JSON, XML 자동 포매팅
+- JSON 자동 포매팅
 - 로그 출력 포맷 커스터마이징
-- 릴리즈 빌드에서 자동 로그 차단 가능
   
 개발 중에는 보기 좋고, 가독성이 좋아 디버깅 효율을 높인다.
 
-### Timber 
+### [Timber](https://github.com/JakeWharton/timber)
 
 <img width="466" height="30" alt="스크린샷 2025-10-14 오후 4 12 30" src="https://github.com/user-attachments/assets/b212e08d-9ec5-4480-b6eb-490ebcbd8456" />
 
-Timber는 Square에서 만든 경량 로깅 라이브러리이다.
+Timber는 Log
 ```kotlin
 class TuripDebugTree : Timber.DebugTree()
 class TuripReleaseTree : Timber.Tree() 
@@ -57,7 +55,6 @@ Timber.d("User clicked button: %s", buttonId)
 Timber.e(exception, "Network request failed")
 ```
 특징
-- Log 대비 보일러플레이트 코드 최소화
 - 릴리즈 빌드에서 로그 자동 차단 가능
 - 커스텀 트리(Tree)로 외부 서비스 연동 가능
 
@@ -71,6 +68,21 @@ if (BuildConfig.DEBUG) {
 Timber는 Application 단에서 위와 같은 간단한 코드로 빌드를 구분하여 로그를 찍을 수 있다.
   
 즉, 개발 단계에서는 Timber 하나로 대부분의 로깅 니즈를 해결할 수 있다.
+
+### Timber + Logger
+
+[Logger github](https://github.com/orhanobut/logger?tab=readme-ov-file)를 들어가보면
+
+```kotlin
+Timber.plant(object : Timber.DebugTree() {
+            override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+                Logger.log(priority, tag, message, t)
+            }
+        })
+```
+위와 같이 Timber로 로그를 설정하면서, 실제 출력은 Logger를 통해 보기 좋게 표현할 수 있다.
+
+따라서, 빌드 타입별 제어는 Timber에서 담당하고, Logger는 포맷만 예쁘게 보여주는 역할을 하여 좋은 로깅 전략을 가져갈 수 있다.
 
 ### 로깅 레벨
 로깅에는 여러 로깅레벨이 있다.
